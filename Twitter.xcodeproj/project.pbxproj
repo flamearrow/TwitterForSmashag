@@ -8,12 +8,20 @@
 
 /* Begin PBXBuildFile section */
 		22404C0F1DAB517000C0C6DC /* Twitter.h in Headers */ = {isa = PBXBuildFile; fileRef = 22404C0D1DAB517000C0C6DC /* Twitter.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		22404C191DAB51C800C0C6DC /* MediaItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 22404C151DAB51C800C0C6DC /* MediaItem.swift */; };
+		22404C1A1DAB51C800C0C6DC /* Tweet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 22404C161DAB51C800C0C6DC /* Tweet.swift */; };
+		22404C1B1DAB51C800C0C6DC /* TwitterRequest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 22404C171DAB51C800C0C6DC /* TwitterRequest.swift */; };
+		22404C1C1DAB51C800C0C6DC /* User.swift in Sources */ = {isa = PBXBuildFile; fileRef = 22404C181DAB51C800C0C6DC /* User.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
 		22404C0A1DAB517000C0C6DC /* Twitter.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Twitter.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		22404C0D1DAB517000C0C6DC /* Twitter.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Twitter.h; sourceTree = "<group>"; };
 		22404C0E1DAB517000C0C6DC /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		22404C151DAB51C800C0C6DC /* MediaItem.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MediaItem.swift; sourceTree = "<group>"; };
+		22404C161DAB51C800C0C6DC /* Tweet.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Tweet.swift; sourceTree = "<group>"; };
+		22404C171DAB51C800C0C6DC /* TwitterRequest.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TwitterRequest.swift; sourceTree = "<group>"; };
+		22404C181DAB51C800C0C6DC /* User.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = User.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -46,6 +54,10 @@
 		22404C0C1DAB517000C0C6DC /* Twitter */ = {
 			isa = PBXGroup;
 			children = (
+				22404C151DAB51C800C0C6DC /* MediaItem.swift */,
+				22404C161DAB51C800C0C6DC /* Tweet.swift */,
+				22404C171DAB51C800C0C6DC /* TwitterRequest.swift */,
+				22404C181DAB51C800C0C6DC /* User.swift */,
 				22404C0D1DAB517000C0C6DC /* Twitter.h */,
 				22404C0E1DAB517000C0C6DC /* Info.plist */,
 			);
@@ -95,6 +107,7 @@
 				TargetAttributes = {
 					22404C091DAB517000C0C6DC = {
 						CreatedOnToolsVersion = 8.0;
+						LastSwiftMigration = 0800;
 						ProvisioningStyle = Automatic;
 					};
 				};
@@ -131,6 +144,10 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				22404C1C1DAB51C800C0C6DC /* User.swift in Sources */,
+				22404C191DAB51C800C0C6DC /* MediaItem.swift in Sources */,
+				22404C1A1DAB51C800C0C6DC /* Tweet.swift in Sources */,
+				22404C1B1DAB51C800C0C6DC /* TwitterRequest.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -239,6 +256,7 @@
 		22404C131DAB517000C0C6DC /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_IDENTITY = "";
 				DEFINES_MODULE = YES;
 				DYLIB_COMPATIBILITY_VERSION = 1;
@@ -250,6 +268,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = com.ml.gb.toy.Twitter;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 3.0;
 			};
 			name = Debug;
@@ -257,6 +276,7 @@
 		22404C141DAB517000C0C6DC /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_IDENTITY = "";
 				DEFINES_MODULE = YES;
 				DYLIB_COMPATIBILITY_VERSION = 1;
