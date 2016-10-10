@@ -32,24 +32,28 @@ public class Tweet : CustomStringConvertible
         public let nsrange: NSRange             // index into an NS[Attributed]String made from the Tweet's text
 
         public init?(data: NSDictionary?, inText: String, prefix: String?) {
-            let indices = data?.valueForKeyPath(TwitterKey.Entities.Indices) as? NSArray
-            if let startIndex = (indices?.firstObject as? NSNumber)?.integerValue {
-                if let endIndex = (indices?.lastObject as? NSNumber)?.integerValue {
+            let indices = data?.value(forKeyPath: TwitterKey.Entities.Indices) as? NSArray
+            if let startIndex = (indices?.firstObject as? NSNumber)?.intValue {
+                if let endIndex = (indices?.lastObject as? NSNumber)?.intValue {
                     let length = inText.characters.count
                     if length > 0 {
                         let start = max(min(startIndex, length-1), 0)
                         let end = max(min(endIndex, length), 0)
                         if end > start {
-                            var adjustedRange = inText.startIndex.advancedBy(start)...inText.startIndex.advancedBy(end-1)
-                            var keywordInText = inText.substringWithRange(adjustedRange)
+                            var adjustedRange = inText.index(inText.startIndex, offsetBy: start)..<inText.index(inText.startIndex, offsetBy: end)
+//                            var adjustedRange = inText.startIndex.advancedBy(start)...inText.startIndex.advancedBy(end-1)
+                            var keywordInText = inText.substring(with: adjustedRange)
+//                            var keywordInText = inText.substringWithRange(adjustedRange)
                             if prefix != nil && !keywordInText.hasPrefix(prefix!) && start > 0 {
-                                adjustedRange = inText.startIndex.advancedBy(start-1)...inText.startIndex.advancedBy(end-2)
-                                keywordInText = inText.substringWithRange(adjustedRange)
+                                adjustedRange = inText.index(inText.startIndex, offsetBy: start-1)..<inText.index(inText.startIndex, offsetBy: end-1)
+//                                adjustedRange = inText.startIndex.advancedBy(start-1)...inText.startIndex.advancedBy(end-2)
+                                keywordInText = inText.substring(with: adjustedRange)
+//                                keywordInText = inText.substringWithRange(adjustedRange)
                             }
                             range = adjustedRange
                             keyword = keywordInText
                             if prefix == nil || keywordInText.hasPrefix(prefix!) {
-                                nsrange = inText.rangeOfString(keyword, nearRange: NSMakeRange(startIndex, endIndex-startIndex))
+                                nsrange = inText.rangeOfString(substring: keyword as NSString, nearRange: NSMakeRange(startIndex, endIndex-startIndex))
                                 if nsrange.location != NSNotFound {
                                     // failable initializers are required to initialize all properties before returning failure
                                     // (this is probably just a (temporary?) limitation of the implementation of Swift)
@@ -78,12 +82,12 @@ public class Tweet : CustomStringConvertible
     // MARK: - Private Implementation
 
     init?(data: NSDictionary?) {
-        user = User(data: data?.valueForKeyPath(TwitterKey.User) as? NSDictionary)
-        text = data?.valueForKeyPath(TwitterKey.Text) as? String
-        created = (data?.valueForKeyPath(TwitterKey.Created) as? String)?.asTwitterDate
-        id = data?.valueForKeyPath(TwitterKey.ID) as? String
+        user = User(data: data?.value(forKeyPath: TwitterKey.User) as? NSDictionary)
+        text = data?.value(forKeyPath: TwitterKey.Text) as? String
+        created = (data?.value(forKeyPath: TwitterKey.Created) as? String)?.asTwitterDate
+        id = data?.value(forKeyPath: TwitterKey.ID) as? String
         var accumulatedMedia = [MediaItem]()
-        if let mediaEntities = data?.valueForKeyPath(TwitterKey.Media) as? NSArray {
+        if let mediaEntities = data?.value(forKeyPath: TwitterKey.Media) as? NSArray {
             for mediaData in mediaEntities {
                 if let mediaItem = MediaItem(data: mediaData as? NSDictionary) {
                     accumulatedMedia.append(mediaItem)
@@ -91,12 +95,12 @@ public class Tweet : CustomStringConvertible
             }
         }
         media = accumulatedMedia
-        let hashtagMentionsArray = data?.valueForKeyPath(TwitterKey.Entities.Hashtags) as? NSArray
-        hashtags = Tweet.getIndexedKeywords(hashtagMentionsArray, inText: text, prefix: "#")
-        let urlMentionsArray = data?.valueForKeyPath(TwitterKey.Entities.URLs) as? NSArray
-        urls = Tweet.getIndexedKeywords(urlMentionsArray, inText: text, prefix: "h")
-        let userMentionsArray = data?.valueForKeyPath(TwitterKey.Entities.UserMentions) as? NSArray
-        userMentions = Tweet.getIndexedKeywords(userMentionsArray, inText: text, prefix: "@")
+        let hashtagMentionsArray = data?.value(forKeyPath: TwitterKey.Entities.Hashtags) as? NSArray
+        hashtags = Tweet.getIndexedKeywords(dictionary: hashtagMentionsArray, inText: text, prefix: "#")
+        let urlMentionsArray = data?.value(forKeyPath: TwitterKey.Entities.URLs) as? NSArray
+        urls = Tweet.getIndexedKeywords(dictionary: urlMentionsArray, inText: text, prefix: "h")
+        let userMentionsArray = data?.value(forKeyPath: TwitterKey.Entities.UserMentions) as? NSArray
+        userMentions = Tweet.getIndexedKeywords(dictionary: userMentionsArray, inText: text, prefix: "@")
         
         if user == nil || text == nil || created == nil {
             return nil
@@ -131,7 +135,7 @@ public class Tweet : CustomStringConvertible
 }
 
 private extension NSString {
-    func rangeOfString(substring: NSString, nearRange: NSRange) -> NSRange {
+    func rangeOfString1(substring: NSString, nearRange: NSRange) -> NSRange {
         if substring.length <= 0  && substring != NSNotFound{
             return NSMakeRange(NSNotFound, 0)
         }
@@ -139,13 +143,13 @@ private extension NSString {
         var end = max(min(nearRange.location + nearRange.length, length), 0)
         var done = false
         while !done {
-            let range = rangeOfString(substring as String, options: [], range: NSMakeRange(start, end-start) )
+            let range = rangeOfString1(substring as String, options: [], range: NSMakeRange(start, end-start) )
             if range.location != NSNotFound {
                 return range
             }
             done = true
-            if start > 0 { start-- ; done = false }
-            if end < length { end++ ; done = false }
+            if start > 0 { start -= 1 ; done = false }
+            if end < length { end += 1 ; done = false }
         }
         return NSMakeRange(NSNotFound, 0)
     }
@@ -154,10 +158,10 @@ private extension NSString {
 private extension String {
     var asTwitterDate: NSDate? {
         get {
-            let dateFormatter = NSDateFormatter()
-            dateFormatter.locale = NSLocale(localeIdentifier: "en_US_POSIX")
+            let dateFormatter = DateFormatter()
+            dateFormatter.locale = NSLocale(localeIdentifier: "en_US_POSIX") as Locale!
             dateFormatter.dateFormat = "EEE MMM dd HH:mm:ss Z yyyy"
-            return dateFormatter.dateFromString(self)
+            return dateFormatter.date(from: self) as NSDate?
         }
     }
 }

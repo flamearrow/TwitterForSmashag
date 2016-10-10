@@ -23,13 +23,13 @@ public struct User: CustomStringConvertible
     // MARK: - Private Implementation
 
     init?(data: NSDictionary?) {
-        if let nameFromData = data?.valueForKeyPath(TwitterKey.Name) as? String {
-            if let screenNameFromData = data?.valueForKeyPath(TwitterKey.ScreenName) as? String {
+        if let nameFromData = data?.value(forKeyPath: TwitterKey.Name) as? String {
+            if let screenNameFromData = data?.value(forKeyPath: TwitterKey.ScreenName) as? String {
                 name = nameFromData
                 screenName = screenNameFromData
-                id = data?.valueForKeyPath(TwitterKey.ID) as? String
-                verified = data?.valueForKeyPath(TwitterKey.Verified)?.boolValue ?? false
-                if let urlString = data?.valueForKeyPath(TwitterKey.ProfileImageURL) as? String {
+                id = data?.value(forKeyPath: TwitterKey.ID) as? String
+                verified = (data?.value(forKeyPath: TwitterKey.Verified) as AnyObject).boolValue ?? false
+                if let urlString = data?.value(forKeyPath: TwitterKey.ProfileImageURL) as? String {
                     profileImageURL = NSURL(string: urlString)
                 } else {
                     profileImageURL = nil
@@ -56,7 +56,7 @@ public struct User: CustomStringConvertible
         dictionary[TwitterKey.ID] = self.id
         dictionary[TwitterKey.Verified] = verified ? "YES" : "NO"
         dictionary[TwitterKey.ProfileImageURL] = profileImageURL?.absoluteString
-        return dictionary
+        return dictionary as AnyObject
     }
 
     struct TwitterKey {

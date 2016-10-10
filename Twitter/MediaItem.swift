@@ -21,11 +21,11 @@ public struct MediaItem
     // MARK: - Private Implementation
 
     init?(data: NSDictionary?) {
-        if let urlString = data?.valueForKeyPath(TwitterKey.MediaURL) as? NSString {
+        if let urlString = data?.value(forKeyPath: TwitterKey.MediaURL) as? NSString {
             if let urlFromString = NSURL(string: urlString as String) {
                 url = urlFromString
-                let h = data?.valueForKeyPath(TwitterKey.Height) as? NSNumber
-                let w = data?.valueForKeyPath(TwitterKey.Width) as? NSNumber
+                let h = data?.value(forKeyPath: TwitterKey.Height) as? NSNumber
+                let w = data?.value(forKeyPath: TwitterKey.Width) as? NSNumber
                 if h != nil && w != nil && h?.doubleValue != 0 {
                     aspectRatio = w!.doubleValue / h!.doubleValue
                     // failable initializers are required to initialize all properties before returning failure
