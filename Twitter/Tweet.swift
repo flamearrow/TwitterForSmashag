@@ -30,7 +30,8 @@ public class Tweet : CustomStringConvertible
         public let keyword: String              // will include # or @ or http:// prefix
         public let range: Range<String.Index>   // index into the Tweet's text property only
         public let nsrange: NSRange             // index into an NS[Attributed]String made from the Tweet's text
-
+        
+        
         public init?(data: NSDictionary?, inText: String, prefix: String?) {
             let indices = data?.value(forKeyPath: TwitterKey.Entities.Indices) as? NSArray
             if let startIndex = (indices?.firstObject as? NSNumber)?.intValue {
@@ -53,7 +54,9 @@ public class Tweet : CustomStringConvertible
                             range = adjustedRange
                             keyword = keywordInText
                             if prefix == nil || keywordInText.hasPrefix(prefix!) {
-                                nsrange = inText.rangeOfString(substring: keyword as NSString, nearRange: NSMakeRange(startIndex, endIndex-startIndex))
+//                                nsrange = inText.rangeOfString(substring: keyword as NSString, nearRange: NSMakeRange(startIndex, endIndex-startIndex))
+                                nsrange = ((inText as NSString?)!.range(of: keyword, range: NSMakeRange(startIndex, endIndex - startIndex)))
+                                
                                 if nsrange.location != NSNotFound {
                                     // failable initializers are required to initialize all properties before returning failure
                                     // (this is probably just a (temporary?) limitation of the implementation of Swift)
@@ -135,15 +138,15 @@ public class Tweet : CustomStringConvertible
 }
 
 private extension NSString {
-    func rangeOfString1(substring: NSString, nearRange: NSRange) -> NSRange {
-        if substring.length <= 0  && substring != NSNotFound{
+    func rangeOfString1(_ substring: NSString, nearRange: NSRange) -> NSRange {
+        if substring.length <= 0{
             return NSMakeRange(NSNotFound, 0)
         }
         var start = max(min(nearRange.location, length-1), 0)
         var end = max(min(nearRange.location + nearRange.length, length), 0)
         var done = false
         while !done {
-            let range = rangeOfString1(substring as String, options: [], range: NSMakeRange(start, end-start) )
+            let range = rangeOfString1(substring, nearRange: NSMakeRange(start, end-start) )
             if range.location != NSNotFound {
                 return range
             }

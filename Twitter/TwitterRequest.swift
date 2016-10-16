@@ -59,7 +59,7 @@ public class TwitterRequest
     // convenience "fetch" for when self is a request that returns Tweet(s)
     // handler is not necessarily invoked on the main queue
     
-    public func fetchTweets(handler: ([Tweet]) -> Void) {
+    public func fetchTweets(handler: @escaping ([Tweet]) -> Void) {
         fetch { results in
             var tweets = [Tweet]()
             var tweetArray: NSArray?
@@ -89,8 +89,8 @@ public class TwitterRequest
     // calls the handler (not necessarily on the main queue)
     //   with the JSON results converted to a Property List
     
-    public func fetch(handler: (_: PropertyList?) -> Void) {
-        performTwitterRequest(SLRequestMethod.GET, handler: handler)
+    public func fetch(handler: @escaping (PropertyList?) -> Void) {
+        performTwitterRequest(method:SLRequestMethod.GET, handler: handler)
     }
     
     // generates a request for older Tweets than were returned by self
@@ -115,15 +115,15 @@ public class TwitterRequest
     // then calls the other version of this method that takes an SLRequest
     // handler is not necessarily called on the main queue
     
-    func performTwitterRequest(method: SLRequestMethod, handler: (_: PropertyList?) -> Void) {
-        let jsonExtension = (self.requestType.rangeOfString(JSONExtension) == nil) ? JSONExtension : ""
+    func performTwitterRequest(method: SLRequestMethod, handler: @escaping (PropertyList?) -> Void) {
+        let jsonExtension = (self.requestType.range(of: JSONExtension) == nil) ? JSONExtension : ""
         let request = SLRequest(
             forServiceType: SLServiceTypeTwitter,
             requestMethod: method,
-            URL: NSURL(string: "\(TwitterURLPrefix)\(self.requestType)\(jsonExtension)"),
+            url: URL(string: "\(TwitterURLPrefix)\(self.requestType)\(jsonExtension)"),
             parameters: self.parameters
         )
-        performTwitterRequest(request, handler: handler)
+        performTwitterRequest(request:request!, handler: handler)
     }
     
     // sends the request to Twitter
@@ -139,8 +139,8 @@ public class TwitterRequest
                     do {
                         propertyListResponse = try JSONSerialization.jsonObject(
                             with: jsonResponse!,
-                            options: JSONSerialization.ReadingOptions.MutableLeaves
-                        )
+                            options: JSONSerialization.ReadingOptions.mutableLeaves
+                        ) as PropertyList
                         if propertyListResponse == nil {
                             let error = "Couldn't parse JSON response."
                             self.log(whatToLog: error as AnyObject)
@@ -167,7 +167,7 @@ public class TwitterRequest
                 if granted {
                     if let account = accountStore.accounts(with: twitterAccountType)?.last as? ACAccount {
                         twitterAccount = account
-                        self.performTwitterRequest(request, handler: handler)
+                        self.performTwitterRequest(request:request, handler: handler)
                     } else {
                         let error = "Couldn't discover Twitter account type."
                         self.log(whatToLog: error as AnyObject)
@@ -187,7 +187,7 @@ public class TwitterRequest
     
     // modifies parameters in an existing request to create a new one
     
-    private func modifiedRequest(parametersToChange parametersToChange: Dictionary<String,String>, clearCount: Bool = false) -> TwitterRequest {
+    private func modifiedRequest(parametersToChange: Dictionary<String,String>, clearCount: Bool = false) -> TwitterRequest {
         var newParameters = parameters
         for (key, value) in parametersToChange {
             newParameters[key] = value
@@ -203,9 +203,10 @@ public class TwitterRequest
         if let responseDictionary = propertyListResponse as? NSDictionary {
             self.max_id = responseDictionary.value(forKeyPath: TwitterKey.SearchMetadata.MaxID) as? String
             if let next_results = responseDictionary.value(forKeyPath: TwitterKey.SearchMetadata.NextResults) as? String {
-                for queryTerm in next_results.componentsSeparatedByString(TwitterKey.SearchMetadata.Separator) {
+//                for queryTerm in next_results.componentsSeparatedByString(TwitterKey.SearchMetadata.Separator) {
+                for queryTerm in next_results.components(separatedBy: TwitterKey.SearchMetadata.Separator) {
                     if queryTerm.hasPrefix("?\(TwitterKey.MaxID)=") {
-                        let next_id = queryTerm.componentsSeparatedByString("=")
+                        let next_id = queryTerm.components(separatedBy: "=")
                         if next_id.count == 2 {
                             self.min_id = next_id[1]
                         }
